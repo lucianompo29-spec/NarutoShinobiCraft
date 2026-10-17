@@ -1,0 +1,40 @@
+
+name: Build Naruto Shinobi Craft
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extrair código do mod
+        run: |
+          mkdir projeto
+          unzip -q NarutoShinobiCraft_1.20.1_Fabric_Source.zip -d projeto
+          find projeto -name build.gradle -print
+
+      - name: Compilar mod
+        run: |
+          cd projeto
+          gradle_file="$(find . -name build.gradle -print -quit)"
+          test -n "$gradle_file"
+          cd "$(dirname "$gradle_file")"
+          gradle build --no-daemon
+
+      - name: Disponibilizar arquivo JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: NarutoShinobiCraft-JAR
+          path: projeto/**/*.jar
+          
