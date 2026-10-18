@@ -1,4 +1,3 @@
-
 name: Build Naruto Shinobi Craft
 
 on:
@@ -32,7 +31,9 @@ jobs:
         run: |
           settings_file="$(find projeto -name settings.gradle -print -quit)"
           test -n "$settings_file"
-          sed -i '/repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)/d' "$settings_file"
+          sed -i 's/PREFER_SETTINGS/PREFER_PROJECT/g' "$settings_file"
+          echo "=== Repository configuration ==="
+          grep -n -E 'repositoriesMode|dependencyResolutionManagement' "$settings_file" || true
           
       - name: Build mod
         run: |
