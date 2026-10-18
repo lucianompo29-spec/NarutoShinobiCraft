@@ -1,3 +1,4 @@
+
 name: Build Naruto Shinobi Craft
 
 on:
@@ -27,14 +28,38 @@ jobs:
           mkdir projeto
           unzip -q NarutoShinobiCraft_1.20.1_Fabric_Source.zip -d projeto
 
-      - name: Fix Gradle repository conflict
+      - name: Fix Gradle repository configuration
         run: |
           settings_file="$(find projeto -name settings.gradle -print -quit)"
           test -n "$settings_file"
-          sed -i 's/PREFER_SETTINGS/PREFER_PROJECT/g' "$settings_file"
-          echo "=== Repository configuration ==="
-          grep -n -E 'repositoriesMode|dependencyResolutionManagement' "$settings_file" || true
-          
+          python3 - "$settings_file" <<'PY'
+          import re
+          import sys
+
+          path = sys.argv[1]
+          with open(path, encoding="utf-8") as f:
+              text = f.read()
+
+          text = re.sub(
+              r'dependencyResolutionManagement\s*\{.*?\n\}',
+              '',
+              text,
+              flags=re.S
+          )
+
+          text = re.sub(
+              r'repositoriesMode\.set\(RepositoriesMode\.[A-Z_]+\)',
+              '',
+              text
+          )
+
+          with open(path, "w", encoding="utf-8") as f:
+              f.write(text)
+
+          print("=== settings.gradle corrigido ===")
+          print(text)
+          PY
+
       - name: Build mod
         run: |
           cd projeto
