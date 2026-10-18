@@ -28,6 +28,12 @@ jobs:
           mkdir projeto
           unzip -q NarutoShinobiCraft_1.20.1_Fabric_Source.zip -d projeto
 
+      - name: Fix Gradle repository conflict
+        run: |
+          settings_file="$(find projeto -name settings.gradle -print -quit)"
+          test -n "$settings_file"
+          sed -i '/repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)/d' "$settings_file"
+          
       - name: Build mod
         run: |
           cd projeto
